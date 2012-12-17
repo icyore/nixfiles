@@ -3,5 +3,7 @@
 [pager]
     diff =
 [user]
-	email = dccmx@dccmx.com
-	name = dccmx
+	email = hdd@zhihu.com
+	name = hdd
+[push]
+	default = matching
