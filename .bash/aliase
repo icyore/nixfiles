@@ -25,6 +25,7 @@ alias more='less'
 alias pgrep="pgrep -l"
 alias recent="ls -lAt | head"
 alias Xdefaults="xrdb -load ~/.Xdefaults"
+alias reload="source ~/.profile"
 
 ## update package
 if [[ $OSTYPE == linux-gnu ]]; then
