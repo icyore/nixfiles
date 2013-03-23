@@ -3,6 +3,6 @@
 if [[ $OSTYPE == linux-gnu ]]; then
   vim -d "$2" "$5"
 elif [[ $OSTYPE == darwin* ]]; then
-  mvim -v -d "$2" "$5"
+  vim -v -d "$2" "$5"
 fi
 

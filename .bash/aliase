@@ -12,7 +12,7 @@ alias back='cd $OLDPWD'
 alias cd..='cd ..'
 alias df='df -h'
 alias du='du -h -c'
-alias mkdir='mkdir -p -v'
+alias mkdir='mkdir -p'
 alias ..='cd ..'
 ## 
 alias grep='grep --color=auto'
