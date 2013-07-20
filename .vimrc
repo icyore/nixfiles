@@ -19,31 +19,42 @@ Bundle 'gmarik/vundle'
 " my bundles
 Bundle 'a.vim'
 Bundle 'mileszs/ack.vim'
-Bundle 'AutoComplPop'
-Bundle 'Rip-Rip/clang_complete'
+Bundle 'kien/ctrlp.vim'
 Bundle 'DirDiff.vim'
-Bundle 'dccmx/DrawIt'
-Bundle 'sudo.vim'
-Bundle 'L9'
-Bundle 'FuzzyFinder'
-Bundle 'jnwhiteh/vim-golang'
+
+Bundle 'scratch.vim'
+Bundle 'DrawIt'
+
+Bundle 'junegunn/vim-easy-align'
+Bundle 'bronson/vim-visual-star-search'
+Bundle 'EasyGrep'
+
 Bundle 'nsf/gocode', {'rtp': 'vim/'}
 Bundle 'dccmx/google-style.vim'
+Bundle 'scrooloose/syntastic'
+
 Bundle 'JSON.vim'
+Bundle 'jnwhiteh/vim-golang'
 Bundle 'dccmx/vim-lemon-syntax'
 Bundle 'plasticboy/vim-markdown'
-Bundle 'matchit.zip'
-Bundle 'dccmx/minibufexpl.vim'
-Bundle 'The-NERD-tree'
+Bundle "pangloss/vim-javascript"
+Bundle 'rodjek/vim-puppet'
 Bundle 'garyharan/vim-proto'
 Bundle 'msteinert/vim-ragel'
-Bundle 'scratch.vim'
-Bundle 'scrooloose/syntastic'
+
+Bundle 'Yggdroot/indentLine'
+Bundle 'kien/rainbow_parentheses.vim'
+Bundle 'matchit.zip'
+Bundle 'fholgado/minibufexpl.vim'
+Bundle 'scrooloose/nerdtree'
 Bundle 'majutsushi/tagbar'
+
 Bundle 'tpope/vim-fugitive'
+Bundle 'gregsexton/gitv'
+Bundle 'airblade/vim-gitgutter'
+
 Bundle 'Lokaltog/vim-powerline'
-Bundle 'Shougo/vimproc'
-Bundle 'Shougo/vimshell'
+Bundle 'Valloric/YouCompleteMe'
 
 filetype plugin indent on     " required!
 " }}}
@@ -87,10 +98,16 @@ set visualbell           " don't beep
 set noerrorbells         " don't beep
 set hidden " you can change buffers without saving
 "set mouse=a "don't use mouse everywhere
+
 set wildmenu " turn on command line completion wild style
+set wildmode=full
 " ignore these list file extensions
 set wildignore=*.dll,*.o,*.obj,*.bak,*.exe,*.pyc,*.jpg,*.gif,*.png
-set wildmode=full
+set wildignore+=*.a,*.o
+set wildignore+=*.bmp,*.gif,*.ico,*.jpg,*.png
+set wildignore+=.DS_Store,.git,.hg,.svn
+set wildignore+=*~,*.swp,*.tmp
+
 set autowrite
 set autoread
 " set ttyfast
@@ -159,6 +176,14 @@ set tabstop=2 " real tabs should be 8, and they will show with  set list on
 
 " Plugin Settings {{{
 
+" minibufexpl {{{
+let g:miniBufExplorerHideWhenDiff = 1
+" }}}
+
+" git gutter {{{
+let g:gitgutter_enabled = 0
+" }}}
+
 " Powerline Settings {{{
 let g:Powerline_symbols = 'fancy'
 let g:Powerline_stl_path_style = 'filename'
@@ -202,9 +227,23 @@ let NERDTreeWinPos="right"
 
 " Syntastic {{{
 let g:syntastic_check_on_open=1
-let g:syntastic_cpp_compiler_options=' -D_GNU_SOURCE -I ./lib -I ../lib -I../src -I./src -I./include -I../include -I../deps -I../../deps -I. -I.. -I../.. -I../../.. -I../../../.. -I../../../../..'
-let g:syntastic_c_compiler_options=' -D_GNU_SOURCE -std=c99 -I ./lib -I ../lib -I../src -I./src -I./include -I../include -I../deps -I../../deps -I. -I.. -I../.. -I../../.. -I../../../.. -I../../../../..'
-let g:syntastic_python_checker_args = '--ignore=E501'
+
+let g:syntastic_c_check_header = 1
+let g:syntastic_c_auto_refresh_includes = 1
+let g:syntastic_c_include_dirs = [ 'include', '../include', 'lib', '../lib', 'src', '../src', '../deps', '../../deps', '.', '..', '../..', '../../..', '../../../..', '../../../../..']
+let g:syntastic_c_compiler_options=' -D_GNU_SOURCE -std=c99'
+
+let g:syntastic_cpp_check_header = 1
+let g:syntastic_cpp_auto_refresh_includes = 1
+let g:syntastic_cpp_include_dirs = [ 'include', '../include', 'lib', '../lib', 'src', '../src', '../deps', '../../deps', '.', '..', '../..', '../../..', '../../../..', '../../../../..']
+let g:syntastic_cpp_compiler_options=' -D_GNU_SOURCE'
+
+let g:syntastic_python_flake8_args='--ignore=E501'
+" }}}
+
+" YouCompleteMe {{{
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 " }}}
 
 " ack {{{
@@ -216,6 +255,8 @@ let g:ackprg="ack -H --nocolor --nogroup --column"
 " Mappings {{{
 " save me from SHIFT
 nnoremap ; :
+
+vnoremap <silent> <Enter> :EasyAlign<cr>
 
 set pastetoggle=<F2>
 
@@ -238,10 +279,10 @@ endif
 vnoremap p <Esc>:let current_reg = @"<CR>gvdi<C-R>=current_reg<CR><Esc>
 
 " Make Arrow Keys Useful Again {{{
-map <down> <ESC>:bd<CR>
+map <down> <ESC>:MBEbd<CR>
 map <up> <ESC>:Scratch<CR>
-map <right> <ESC>:bn!<CR>
-map <left> <ESC>:bp!<CR>
+map <right> <ESC>:MBEbn<CR>
+map <left> <ESC>:MBEbp<CR>
 map <space> <ESC>:b#<CR>
 map <leader>bd <ESC>:call CloseTab()<CR>
 func! CloseTab()
@@ -262,19 +303,23 @@ nmap <F9> :SCCompile<cr>
 nmap <F10> :SCCompileRun<cr> 
 nnoremap <leader>a :Ack 
 nmap <leader>H <Esc>:A!<CR>
-nmap <leader>f <Esc>:GoFmt<CR>
+nmap <leader>f :CtrlP<cr>
+nmap <leader>git :Gitv<cr>
+nmap git :Gitv!<cr>
+nmap <leader>gf <Esc>:GoFmt<CR>
+nmap <leader>gg :GitGutterToggle<CR>
 nmap <leader>tl <Esc>:TagbarToggle<CR>
 nmap <leader>fl <Esc>:NERDTreeToggle<CR>
-nmap <leader>ff :FufFileWithFullCwd<CR>
-nmap <leader>ftf :FufTaggedFile<CR>
-nmap <leader>ft :FufTag<CR>
 nmap <leader>el :cw<CR>
 nmap <leader>se :Errors<CR><C-j>
-nmap <leader>en :cn<CR>
-nmap <leader>ep :cp<CR>
-nmap <leader>ec :cclose<CR>
-nmap <leader>es :Errors<CR>
+nmap en :cn<CR>
+nmap ep :cp<CR>
+nmap ec :cclose<CR>
+nmap es :Errors<CR>
 nmap <leader><space> :make<CR>
+
+nmap gn <Plug>GitGutterNextHunk
+nmap gp <Plug>GitGutterPrevHunk
 
 "Window Switch{{{
 noremap <C-j> <C-w>j
@@ -293,34 +338,6 @@ map <leader>cd :cd %:p:h<CR>
 
 " Autocommands {{{
 
-function! Goformat()
-    let view = winsaveview()
-    let regel=line(".")
-    silent %!gofmt -tabwidth=2 -tabs=false
-    if v:shell_error
-        let errors = []
-        for line in getline(1, line('$'))
-            let tokens = matchlist(line, '^\(.\{-}\):\(\d\+\):\(\d\+\)\s*\(.*\)')
-            if !empty(tokens)
-                call add(errors, {"filename": @%,
-                                 \"lnum":     tokens[2],
-                                 \"col":      tokens[3],
-                                 \"text":     tokens[4]})
-            endif
-        endfor
-        if empty(errors)
-            % | " Couldn't detect gofmt error format, output errors
-        endif
-        undo
-        if !empty(errors)
-            call setloclist(0, errors, 'r')
-        endif
-        echohl Error | echomsg "Gofmt returned error" | echohl None
-    endif
-    call winrestview(view)
-    call cursor(regel, 1)
-endfunction
-
 autocmd FileType * set formatoptions-=ro
 autocmd FileType ragel set nocindent
 autocmd FileType lemon set nocindent noai indentkeys=
@@ -328,15 +345,12 @@ autocmd FileType python set tabstop=4 shiftwidth=4 softtabstop=4
 autocmd FileType go set makeprg=go\ build
 
 " omnifunc settings
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType html setlocal omnifunc=htmlcomplete#CompleteTags
 autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 autocmd FileType php setlocal omnifunc=phpcomplete#CompletePHP
-"autocmd FileType c setlocal omnifunc=ccomplete#Complete (use clang complete)
-autocmd Filetype go command! GoFmt call Goformat()
-autocmd BufWritePre *.go GoFmt
+autocmd BufWritePre *.go Fmt
 
 " save when losing focus
 autocmd FocusLost * :wa
@@ -344,6 +358,7 @@ autocmd FocusLost * :wa
 if has('win32') || has('win64')
   autocmd GUIEnter * simalt ~x "启动时最大化窗口
 endif
+
 
 " Reread configuration of Vim if .vimrc is saved {{{
 augroup VimConfig
